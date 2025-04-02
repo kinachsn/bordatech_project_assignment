@@ -173,6 +173,7 @@ void TIM2_IRQHandler() {
     }
 }
 
+// Timer 5 interrupt handler (Transmitting 30s)
 void TIM5_IRQHandler() {
     if (TIM5->SR & 0x01) {  // If update interrupt occurs
     	float ble_package_temp[4], ble_package_light[4], ble_package_press[4];
