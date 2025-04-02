@@ -92,7 +92,7 @@ void BMP280_ReadPressure(void) {
     uint32_t adc_P = BMP280_ReadPressureRaw(&I2C1Handle);
     uint32_t adc_T = BMP280_ReadTemperatureRaw(&I2C1Handle);
     bmp280_compensate_T_double(adc_T);
-    float Pressure = (float)bmp280_compensate_P_double(adc_P)/100;
+    float Pressure = (float)bmp280_compensate_P_double(adc_P)/100; // Compensate raw data and convert to hPa
 
     press_buffer[press_index] = Pressure;
     press_index = (press_index + 1) % WINDOW_SIZE;
