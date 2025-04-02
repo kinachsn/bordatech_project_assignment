@@ -1,0 +1,23 @@
+/*
+ * project_timer2.h
+ *
+ *  Created on: Mar 29, 2025
+ *      Author: hasan
+ */
+#include <stdint.h>
+#ifndef INC_PROJECT_TIMER2_H_
+#define INC_PROJECT_TIMER2_H_
+
+void TIM2_NVIC_Configuration(uint8_t EnorDi)
+{
+
+	if(EnorDi == ENABLE)
+	{
+		*NVIC_ISER0 |= ( 1 << 28 );
+	}else
+	{
+		*NVIC_ICER0 |= ( 1 << 28 );
+	}
+}
+
+#endif /* INC_PROJECT_TIMER2_H_ */

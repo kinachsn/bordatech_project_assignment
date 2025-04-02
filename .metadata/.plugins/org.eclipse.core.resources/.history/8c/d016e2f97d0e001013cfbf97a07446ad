@@ -1,0 +1,62 @@
+/*
+ * project_stats.c
+ *
+ *  Created on: Apr 1, 2025
+ *      Author: hasan
+ */
+
+/**
+ * @brief  Calculates the median value of an array of floats
+ * @param  arr: Array of float values
+ * @param  size: Size of the array
+ * @return The median value of the array
+ */
+float calculate_median(float arr[], uint8_t size) {
+    float sorted[size];
+    memcpy(sorted, arr, sizeof(float) * size);
+
+    // Bubble Sort (Sort array in ascending order)
+    for (uint8_t i = 0; i < size - 1; i++) {
+        for (uint8_t j = 0; j < size - i - 1; j++) {
+            if (sorted[j] > sorted[j + 1]) {
+                float temp = sorted[j];
+                sorted[j] = sorted[j + 1];
+                sorted[j + 1] = temp;
+            }
+        }
+    }
+    return sorted[size / 2];
+}
+
+/**
+ * @brief  Finds the minimum value in an array of floats
+ * @param  arr: Array of float values
+ * @param  size: Size of the array
+ * @return The minimum value in the array
+ */
+float find_min(float arr[], uint8_t size) {
+    float min_val = arr[0];
+    for (uint8_t i = 1; i < size; i++) {
+        if (arr[i] < min_val) {
+            min_val = arr[i];
+        }
+    }
+    return min_val;
+}
+
+/**
+ * @brief  Finds the maximum value in an array of floats
+ * @param  arr: Array of float values
+ * @param  size: Size of the array
+ * @return The maximum value in the array
+ */
+float find_max(float arr[], uint8_t size) {
+    float max_val = arr[0];
+    for (uint8_t i = 1; i < size; i++) {
+        if (arr[i] > max_val) {
+            max_val = arr[i];
+        }
+    }
+    return max_val;
+}
+

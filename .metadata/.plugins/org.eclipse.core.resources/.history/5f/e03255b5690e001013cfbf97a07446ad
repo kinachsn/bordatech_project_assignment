@@ -1,0 +1,15 @@
+/*
+ * stm32f407xx_bmp280.h
+ *
+ *  Created on: Mar 31, 2025
+ *      Author: hasan
+ */
+
+#ifndef INC_STM32F407XX_BMP280_H_
+#define INC_STM32F407XX_BMP280_H_
+
+#include "stm32f407xx.h"
+
+void bmp280_init(I2C_Handle_t *i2c);
+
+#endif /* INC_STM32F407XX_BMP280_H_ */

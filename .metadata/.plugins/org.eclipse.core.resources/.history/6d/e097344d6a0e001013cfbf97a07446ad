@@ -1,0 +1,19 @@
+#include "stm32f407xx_bmp280.h"
+
+void BMP280_Init(I2C_Handle_t *pI2CHandle) {
+    uint8_t config[2];
+
+    // Kontrol Register'ını ayarla (0xF4) -> Normal mod, 16x örnekleme
+    config[0] = CTRL_MEAS;
+    config[1] = 0x57;
+
+    I2C_PeripheralControl(pI2CHandle->pI2Cx, ENABLE);
+    I2C_ManageAcking(pI2CHandle->pI2Cx, I2C_ACK_ENABLE);
+
+    I2C_MasterSendData(pI2CHandle, config, 2, BMP280_ADDR, I2C_DISABLE_SR);
+
+    // Konfigürasyon Register'ı (0xF5) -> Standart filtreleme ve standby süresi
+    config[0] = CONFIG;
+    config[1] = 0xAC;
+    I2C_MasterSendData(pI2CHandle, config, 2, BMP280_ADDR, I2C_DISABLE_SR);
+}

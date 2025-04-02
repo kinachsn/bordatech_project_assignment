@@ -1,0 +1,117 @@
+/*
+ * bmp280.c
+ *
+ *  Created on: Mar 30, 2025
+ *      Author: hasan
+ */
+
+#include "bmp280.h"
+
+void BMP280_Init() {
+    uint8_t config[2];
+
+    // Kontrol Register'ını ayarla (0xF4) -> Normal mod, 16x örnekleme
+    config[0] = CTRL_MEAS;
+    config[1] = 0x57;
+
+    I2C_MasterSendData(I2C1Handle, config, 2, BMP280_ADDR, I2C_DISABLE_SR);
+
+    // Konfigürasyon Register'ı (0xF5) -> Standart filtreleme ve standby süresi
+    config[0] = CONFIG;
+    config[1] = 0xAC;
+    I2C_MasterSendData(I2C1Handle, config, 2, BMP280_ADDR, I2C_DISABLE_SR);
+}
+
+void BMP280_ReadCalibrationData() {
+    uint8_t calib_data[24];
+    uint8_t reg_addr = CALIB_DATA_ADDR;
+
+    I2C_MasterSendData(I2C1Handle, &reg_addr, 1, BMP280_ADDR, I2C_DISABLE_SR);
+
+    I2C_MasterReceiveData(I2C1Handle, calib_data, 24, BMP280_ADDR, I2C_DISABLE_SR);
+
+    dig_T1 = (calib_data[0]  << 8) | calib_data[1];
+    dig_T1 = (calib_data[2]  << 8) | calib_data[3];
+    dig_T1 = (calib_data[4]  << 8) | calib_data[5];
+
+    dig_P1 = (calib_data[6]  << 8) | calib_data[7];
+    dig_P2 = (calib_data[8]  << 8) | calib_data[9];
+    dig_P3 = (calib_data[10] << 8) | calib_data[11];
+    dig_P4 = (calib_data[12] << 8) | calib_data[13];
+    dig_P5 = (calib_data[14] << 8) | calib_data[15];
+    dig_P6 = (calib_data[16] << 8) | calib_data[17];
+    dig_P7 = (calib_data[18] << 8) | calib_data[19];
+    dig_P8 = (calib_data[20] << 8) | calib_data[21];
+    dig_P9 = (calib_data[22] << 8) | calib_data[23];
+}
+
+uint32_t BMP280_ReadPressureRaw() {
+    uint8_t pressure_raw[3];
+    uint8_t reg_addr = Press_register;
+
+    I2C_MasterSendData(I2C1Handle, &reg_addr, 1, BMP280_ADDR, I2C_DISABLE_SR);
+
+    I2C_MasterReceiveData(I2C1Handle, pressure_raw, 3, BMP280_ADDR, I2C_DISABLE_SR);
+
+    uint32_t adc_P = ((uint32_t)pressure_raw[0] << 12) | ((uint32_t)pressure_raw[1] << 4) | (pressure_raw[2] >> 4);
+
+    return adc_P;
+}
+
+/*
+ * Compensation formula from the provider
+ */
+// Returns temperature in DegC, double precision. Output value of “51.23” equals 51.23 DegC.
+// t_fine carries fine temperature as global value
+
+BMP280_S32_t t_fine;
+
+double bmp280_compensate_T_double(BMP280_S32_t adc_T) {
+	double var1, var2, T;
+	var1  = (((double)adc_T)/16384.0 - ((double)dig_T1)/1024.0) * ((double)dig_T2);
+	var2  = ((((double)adc_T)/131072.0 - ((double)dig_T1)/8192.0) *
+	(((double)adc_T)/131072.0 - ((double) dig_T1)/8192.0)) * ((double)dig_T3);
+	t_fine = (BMP280_S32_t)(var1 + var2);
+	T  = (var1 + var2) / 5120.0;
+	return T;
+}
+// Returns pressure in Pa as double. Output value of “96386.2” equals 96386.2 Pa = 963.862 hPa
+double bmp280_compensate_P_double(BMP280_S32_t adc_P) {
+	double var1, var2, p;
+
+	var1 = ((double)t_fine/2.0) - 64000.0;
+
+	var2 = var1 * var1 * ((double)dig_P6) / 32768.0;
+	var2 = var2 + var1 * ((double)dig_P5) * 2.0;
+	var2 = (var2/4.0)+(((double)dig_P4) * 65536.0);
+
+	var1 = (((double)dig_P3) * var1 * var1 / 524288.0 + ((double)dig_P2) * var1) / 524288.0;
+	var1 = (1.0 + var1 / 32768.0)*((double)dig_P1);
+
+	if (var1 == 0.0) {
+		return 0; // avoid exception caused by division by zero
+	}
+
+	p = 1048576.0 - (double)adc_P;
+	p = (p - (var2 / 4096.0)) * 6250.0 / var1;
+
+	var1 = ((double)dig_P9) * p * p / 2147483648.0;
+	var2 = p * ((double)dig_P8) / 32768.0;
+
+	p = p + (var1 + var2 + ((double)dig_P7)) / 16.0;
+
+	return p;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

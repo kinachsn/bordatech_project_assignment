@@ -1,0 +1,5 @@
+../drivers/src/project_stats.c:16:7:calculate_median	56	dynamic
+../drivers/src/project_stats.c:39:7:find_min	24	static
+../drivers/src/project_stats.c:55:7:find_max	24	static
+../drivers/src/project_stats.c:79:7:calculate_sample_std	40	static
+../drivers/src/project_stats.c:107:6:calculate_statistics	32	static

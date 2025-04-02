@@ -1,0 +1,37 @@
+/*
+ * project_timer2.h
+ *
+ *  Created on: Mar 29, 2025
+ *      Author: hasan
+ */
+#include <stdint.h>
+#ifndef INC_PROJECT_TIMER2_H_
+#define INC_PROJECT_TIMER2_H_
+
+void TIM2_NVIC_EnableIRQ(uint8_t IRQNumber, uint8_t EnorDi)
+{
+
+	if(EnorDi == ENABLE)
+	{
+		*NVIC_ISER0 |= ( 1 << IRQNumber );
+	}else
+	{
+		if(IRQNumber <= 31)
+		{
+			//program ICER0 register
+			*NVIC_ICER0 |= ( 1 << IRQNumber );
+		}else if(IRQNumber > 31 && IRQNumber < 64 )
+		{
+			//program ICER1 register
+			*NVIC_ICER1 |= ( 1 << (IRQNumber % 32) );
+		}
+		else if(IRQNumber >= 64 && IRQNumber < 96 )
+		{
+			//program ICER2 register
+			*NVIC_ICER2 |= ( 1 << (IRQNumber % 64) );
+		}
+	}
+
+}
+
+#endif /* INC_PROJECT_TIMER2_H_ */

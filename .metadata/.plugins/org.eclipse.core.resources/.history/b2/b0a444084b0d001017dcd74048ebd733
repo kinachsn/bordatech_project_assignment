@@ -1,0 +1,110 @@
+/*
+ * deneme.c
+ *
+ *  Created on: Mar 29, 2025
+ *      Author: hasan
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include "stm32f407xx.h"
+
+#define LM75A_ADDR  0x48
+#define TEMP_REG    0x00
+#define GY302_ADDR  0x23
+#define BME280_ADDR  0x76
+#define PRESS_REG    0xF7
+#define WINDOW_SIZE 5  // Median filter pencere boyutu
+
+I2C_Handle_t I2C1Handle;
+float temp_buffer[WINDOW_SIZE] = {0};  // Sıcaklık ölçüm dizisi
+float light_buffer[WINDOW_SIZE] = {0}; // Işık ölçüm dizisi
+float press_buffer[WINDOW_SIZE] = {0};
+uint8_t press_index = 0;
+uint8_t temp_index = 0, light_index = 0;
+
+float calculate_median(float arr[], uint8_t size) {
+    float sorted[size];
+    memcpy(sorted, arr, sizeof(float) * size);
+
+    for (uint8_t i = 0; i < size - 1; i++) {
+        for (uint8_t j = 0; j < size - i - 1; j++) {
+            if (sorted[j] > sorted[j + 1]) {
+                float temp = sorted[j];
+                sorted[j] = sorted[j + 1];
+                sorted[j + 1] = temp;
+            }
+        }
+    }
+    return sorted[size / 2];
+}
+
+void I2C1_GPIOInits(void) {
+    GPIO_Handle_t I2CPins;
+    I2CPins.pGPIOx = GPIOB;
+    I2CPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
+    I2CPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD;
+    I2CPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU;
+    I2CPins.GPIO_PinConfig.GPIO_PinAltFunMode = 4;
+    I2CPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+
+    I2CPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_6;
+    GPIO_Init(&I2CPins);
+
+    I2CPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_9;
+    GPIO_Init(&I2CPins);
+}
+
+void I2C1_Inits(void) {
+    I2C1Handle.pI2Cx = I2C1;
+    I2C1Handle.I2C_Config.I2C_AckControl = I2C_ACK_ENABLE;
+    I2C1Handle.I2C_Config.I2C_DeviceAddress = 0x61;
+    I2C1Handle.I2C_Config.I2C_FMDutyCycle = I2C_FM_DUTY_2;
+    I2C1Handle.I2C_Config.I2C_SCLSpeed = I2C_SCL_SPEED_SM;
+    I2C_Init(&I2C1Handle);
+}
+
+void BMP280_ReadTemperaturePressure(void) {
+    uint8_t temp_press_data[6];
+    uint8_t reg_addr = 0xF7;
+    int32_t raw_temp, raw_press, t_fine;
+    float temperature, pressure;
+
+    I2C_MasterSendData(&I2C1Handle, &reg_addr, 1, BMP280_ADDR, I2C_DISABLE_SR);
+    I2C_MasterReceiveData(&I2C1Handle, temp_press_data, 6, BMP280_ADDR, I2C_DISABLE_SR);
+
+    raw_press = (temp_press_data[0] << 12) | (temp_press_data[1] << 4) | (temp_press_data[2] >> 4);
+    raw_temp = (temp_press_data[3] << 12) | (temp_press_data[4] << 4) | (temp_press_data[5] >> 4);
+
+    temperature = BMP280_CompensateTemperature(raw_temp, &t_fine);
+    pressure = BMP280_CompensatePressure(raw_press, t_fine);
+
+    press_buffer[press_index] = pressure;
+    press_index = (press_index + 1) % WINDOW_SIZE;
+}
+
+void TIM2_IRQHandler() {
+    if (TIM2->SR & 0x01) {
+        BMP280_ReadTemperaturePressure();
+        float filtered_press = calculate_median(press_buffer, WINDOW_SIZE);
+        printf("Basınç: %.2f hPa\n", filtered_press);
+        TIM2->SR &= ~(1 << 0);
+    }
+}
+
+void TIM2_Init() {
+    TIM2_PCLK_EN();
+    TIM2->PSC = 16000 - 1;
+    TIM2->ARR = 1000 - 1;
+    TIM2->DIER |= (1 << 0);
+    TIM2->CR1 |= (1 << 0);
+    TIM2_IRQInterrupt_Config(ENABLE);
+}
+
+int main() {
+    I2C1_GPIOInits();
+    I2C1_Inits();
+    TIM2_Init();
+
+    while(1);
+}

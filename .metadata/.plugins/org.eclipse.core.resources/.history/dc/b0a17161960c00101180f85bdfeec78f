@@ -1,0 +1,13 @@
+/*
+ * project_timer2.h
+ *
+ *  Created on: Mar 29, 2025
+ *      Author: hasan
+ */
+#include <stdint.h>
+#ifndef INC_PROJECT_TIMER2_H_
+#define INC_PROJECT_TIMER2_H_
+
+void TIM2_IRQInterrupt_Config(uint8_t EnorDi);
+
+#endif /* INC_PROJECT_TIMER2_H_ */

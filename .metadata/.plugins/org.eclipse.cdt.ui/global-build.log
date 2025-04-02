@@ -1,0 +1,7 @@
+00:54:37 **** Incremental Build of configuration Debug for project depo ****
+make -j16 all 
+arm-none-eabi-size  depo.elf 
+   text	   data	    bss	    dec	    hex	filename
+  29388	    500	   2620	  32508	   7efc	depo.elf
+Finished building: default.size.stdout
+ 

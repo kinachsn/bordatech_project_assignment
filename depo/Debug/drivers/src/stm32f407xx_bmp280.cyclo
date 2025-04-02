@@ -1,0 +1,6 @@
+../drivers/src/stm32f407xx_bmp280.c:22:6:BMP280_Init	1
+../drivers/src/stm32f407xx_bmp280.c:44:6:BMP280_ReadCalibrationData	1
+../drivers/src/stm32f407xx_bmp280.c:74:10:BMP280_ReadPressureRaw	1
+../drivers/src/stm32f407xx_bmp280.c:92:10:BMP280_ReadTemperatureRaw	1
+../drivers/src/stm32f407xx_bmp280.c:110:8:bmp280_compensate_T_double	1
+../drivers/src/stm32f407xx_bmp280.c:125:8:bmp280_compensate_P_double	2

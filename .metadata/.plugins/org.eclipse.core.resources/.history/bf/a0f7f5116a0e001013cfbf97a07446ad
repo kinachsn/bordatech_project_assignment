@@ -1,0 +1,128 @@
+/*
+ * bmp280.h
+ *
+ *  Created on: Mar 30, 2025
+ *      Author: hasan
+ */
+
+#ifndef INC_BMP280_H_
+#define INC_BMP280_H_
+
+#include "stm32f407xx.h"
+
+typedef int32_t  BMP280_S32_t;
+typedef uint32_t BMP280_U32_t;
+//------------------------------------------
+#define BMP280_ADDR 	0x77 // SDO --> GND
+#define BMP280_CHIP_ID 	0xD0 // ID
+#define BMP280_RESET	0xE0
+
+#define BMP280_STATUS	0x73
+#define STATUS_CONV		0x08
+#define STATUS_COPY		0x01
+
+//---------------------------------------------------
+/*
+ * Control Measurement Register
+ */
+#define CTRL_MEAS			0xF4
+
+#define OVERSAMPLING_SKIPPED	0x00
+#define OVERSAMPLING_16BIT 		0x01
+#define OVERSAMPLING_17BIT 		0x02
+#define OVERSAMPLING_18BIT 		0x03
+#define OVERSAMPLING_19BIT 		0x04
+#define OVERSAMPLING_20BIT 		0x05
+
+#define CTRL_M_T_OFFSET	  0x05	// Temperature offset
+#define CTRL_M_P_OFFSET	  0x02 	// Pressure offset
+#define CTRL_M_M_OFFSET   0x00  // Mode offset
+
+/*
+ * Temperature Oversampling
+ */
+#define OVERSAMPLING_T_SKIPPED  (OVERSAMPLING_SKIPPED << CTRL_M_T_OFFSET)
+#define OVERSAMPLING_T_16BIT	(OVERSAMPLING_16BIT << CTRL_M_T_OFFSET)
+#define OVERSAMPLING_T_17BIT	(OVERSAMPLING_17BIT << CTRL_M_T_OFFSET)
+#define OVERSAMPLING_T_18BIT	(OVERSAMPLING_18BIT << CTRL_M_T_OFFSET)
+#define OVERSAMPLING_T_19BIT	(OVERSAMPLING_19BIT << CTRL_M_T_OFFSET)
+#define OVERSAMPLING_T_20BIT	(OVERSAMPLING_20BIT << CTRL_M_T_OFFSET)
+
+/*
+ * Pressure Oversampling
+ */
+#define OVERSAMPLING_P_SKIPPED  (OVERSAMPLING_SKIPPED << CTRL_M_P_OFFSET)
+#define OVERSAMPLING_P_16BIT	(OVERSAMPLING_16BIT << CTRL_M_P_OFFSET)
+#define OVERSAMPLING_P_17BIT	(OVERSAMPLING_17BIT << CTRL_M_P_OFFSET)
+#define OVERSAMPLING_P_18BIT	(OVERSAMPLING_18BIT << CTRL_M_P_OFFSET)
+#define OVERSAMPLING_P_19BIT	(OVERSAMPLING_19BIT << CTRL_M_P_OFFSET)
+#define OVERSAMPLING_P_20BIT	(OVERSAMPLING_20BIT << CTRL_M_P_OFFSET)
+
+/*
+ * Modes
+ */
+#define SLEEP	0x00
+#define FORCE	0x01
+#define NORMAL  0x03
+
+//-----------------------------------------------------------
+/*
+ * Config Register
+ */
+#define CONFIG 0xF5
+
+/*
+ * T_standby in Normal Mode
+ */
+#define T_SB_OFFSET		0x05
+
+#define T_SB_0_5		(0x00 << T_SB_OFFSET)
+#define T_SB_62_5		(0x01 << T_SB_OFFSET)
+#define T_SB_125		(0x02 << T_SB_OFFSET)
+#define T_SB_250		(0x03 << T_SB_OFFSET)
+#define T_SB_500		(0x04 << T_SB_OFFSET)
+#define T_SB_1000		(0x05 << T_SB_OFFSET)
+#define T_SB_2000		(0x06 << T_SB_OFFSET)
+#define T_SB_4000		(0x07 << T_SB_OFFSET)
+
+
+/*
+ * Time Constant of IIR_Filter
+ */
+#define FILTER_OFFSET	0x02
+
+#define FILTER_COEFF_2		(0x02 << FILTER_OFFSET)
+#define FILTER_COEFF_5		(0x04 << FILTER_OFFSET)
+#define FILTER_COEFF_11		(0x08 << FILTER_OFFSET)
+#define FILTER_COEFF_22		(0x10 << FILTER_OFFSET)
+
+//-------------------------------------------------------------
+
+#define START_RAW_DATA_POINT	0xF7
+#define RAW_DATA_LENGTH			6
+
+//-------------------------------------------------------------
+
+#define CALIB_DATA_ADDR		0x88
+
+#define Press_register			0xF7
+#define Temperature_register	0xFA
+
+//--------------------------------------------------------------
+uint16_t dig_T1, dig_P1;
+int16_t dig_T2, dig_T3, dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9;
+//--------------------------------------------------------------
+BMP280_S32_t t_fine;
+
+
+
+/*
+void BMP280_ReadCalibrationData(I2C_Handle_t *pI2CHandle);
+uint32_t BMP280_ReadPressureRaw(I2C_Handle_t *pI2CHandle);
+uint32_t BMP280_ReadTemperatureRaw(I2C_Handle_t *pI2CHandle);
+BMP280_S32_t bmp280_compensate_T_int32(BMP280_S32_t uncomp_temp);
+BMP280_U32_t bmp280_compensate_P_int32(BMP280_S32_t uncomp_pres);
+void BMP280_ReadPressure();
+*/
+
+#endif  /* INC_BMP280_H_ */
