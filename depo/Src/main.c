@@ -13,7 +13,7 @@
 #define TEMP_REG    0x00   // Temperature register
 #define GY302_ADDR  0x23   // GY-302 (BH1750) I2C Address
 #define PRESS_REG   0xF7   // BMP280 Pressure register
-#define WINDOW_SIZE 5      // Median filter window size
+#define WINDOW_SIZE 30      // Median filter window size
 #define MAX_JSON_SIZE 512
 
 I2C_Handle_t I2C1Handle;
